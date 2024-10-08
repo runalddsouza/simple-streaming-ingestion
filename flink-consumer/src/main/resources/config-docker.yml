@@ -1,0 +1,47 @@
+flink:
+  checkpointLocation: hdfs://namenode:8020/checkpoints/
+
+hdfs:
+  namenode: hdfs://namenode:8020
+
+hive:
+  metastore: thrift://metastore:9083
+  catalog:
+    name: hive_catalog
+    ddl: >
+      CREATE CATALOG hive_catalog WITH (
+         'type'='iceberg',
+         'catalog-type'='hive',
+         'uri'='thrift://metastore:9083',
+         'property-version'='2',
+         'warehouse'='hdfs://namenode:8020/warehouse'
+       )
+  database:
+    name: ingestion
+    ddl: CREATE DATABASE IF NOT EXISTS ingestion
+
+  table:
+    name: football_match_stats
+    ddl: >
+      CREATE TABLE IF NOT EXISTS ingestion.football_match_stats (
+         match_id VARCHAR COMMENT 'Unique ID for Football Match',
+         game_time VARCHAR,
+         home_team VARCHAR,
+         home_team_stats VARCHAR,
+         away_team VARCHAR,
+         away_team_stats VARCHAR,
+         PRIMARY KEY(`match_id`) NOT ENFORCED
+      ) WITH (
+        'format-version'='2',
+        'write.upsert.enabled'='true',
+        'engine.hive.enabled'='true', 
+        'write.update.mode'='copy-on-write',
+        'write.delete.mode'='copy-on-write',
+        'location' = 'hdfs://namenode:8020/ingestion/football_match_stats'
+      )
+
+kafka:
+  sourceName: football-match-events-kafka
+  broker: broker:29092
+  topicName: FootballMatchEvent
+  consumerGroupName: flink-iceberg-sink-consumer
