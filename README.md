@@ -13,12 +13,12 @@ This python project generates random football match events and publishes to a Ka
 ## flink-consumer 
 This java project consumes football match events from Kafka Topic, applies aggregation logic to the events, creates and writes to the Iceberg tables.<br>
 This job accepts a YAML configuration only , refer `src/main/resources/config-docker.yml`<br>
-To Build jar, make sure you have Maven and Java 17:
+To Build jar, you need Maven 3 and JDK 17:
 - Run `cd flink-consumer`
 - Build `mvn clean package`
 
 Jar will be created in `simple-streaming-ingestion/libs/flink-consumer-x.x.jar`
-The jar does not contain the required dependencies. It can be only deployed on a Flink cluster which has the required dependencies, see `docker/flink-consumer/jars`
+The jar does not contain the required dependencies. It can be only deployed on a Flink cluster which has the required dependencies, see `docker/flink-consumer/Dockerfile`
 
 ## Docker
 ### Setup
@@ -42,7 +42,7 @@ The jar does not contain the required dependencies. It can be only deployed on a
 - Flink: http://localhost:8081/
 - Superset: http://localhost:8088/sqllab/
 
-## Sample Query
+## Sample Hive Query
 ```sql
 select
 	concat(home_team , ' vs ' , away_team) as match, 
@@ -60,7 +60,7 @@ select
 	concat(get_json_object(home_team_stats,'$.RED')  , ' - ' , get_json_object(away_team_stats,'$.RED')) as red_cards
 from ingestion.football_match_stats;
 ```
-### Superset
+## Superset
 ![components](images/superset.png)
 
 ## References
